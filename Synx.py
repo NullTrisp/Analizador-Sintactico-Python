@@ -3,7 +3,7 @@ from LEX.Lex import identifiers
 
 
 class Synx:
-    def __init__(self, lex):
+    def __init__(self, lex: Lex):
         self.lex = lex
         lex.iterateString().iterateStates()
 
