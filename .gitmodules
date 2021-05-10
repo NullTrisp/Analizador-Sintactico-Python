@@ -1,0 +1,3 @@
+[submodule "LEX"]
+	path = LEX
+	url = https://github.com/NullTrisp/Analizador-Lexico-Python.git
