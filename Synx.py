@@ -11,13 +11,14 @@ class Synx:
         idents = self.lex.getIdent()
         for index, token in enumerate(idents):
             if token == identifiers[0]:
+                # must end with ;
                 if index != len(idents) - 1:
                     raise TypeError("\n\nInvalid instruction!")
                 else:
                     print("EOF")
+            # var cannot begin with number
             if token == identifiers[2] and idents[index + 1] == identifiers[1]:
                 raise TypeError("\n\nInvalid instruction!")
-
         return self
 
 
