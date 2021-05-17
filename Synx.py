@@ -1,10 +1,11 @@
-from typing import List
+from LEX.LexError import LexError
+from SynxError import SynxError
 from LEX.Lex import Lex
 from LEX.Lex import identifiers
 
 """
 <Programa> ::= <Instrucción> | <Programa> <Instrucción>
-<Instrucción> ::= <Expresión> <term> | <Término> <term>
+<Instrucción> ::= <Igualdad> <term> | <Comparación> <term> | <Término> <term>
 <Igualdad> ::= <var> <eqTo> <Término>
 <Comparación> ::= <Término> <compOp> <Término>
 <Término> ::= <num> | <Comparación> | <var> 
@@ -40,28 +41,38 @@ class Synx:
     def __init__(self, lex: Lex):
         self.lex = lex
         self.expressions = []
-        self.getInstructions().termChange().compTermChange(
-        ).compChange().igualChange().instrucChange().prograChange()
-        print(self.result)
+        self.getInstructions().createTermino().createCompOp(
+        ).createComparacion().createIgualdad().instrucChange().createPrograma()
 
-    def createInstructions(self, list: List) -> List:
+    def printLines(self, list: list) -> None:
+        for i, tokens in enumerate(list):
+            if i < len(list) - 1:
+                print(f"line {i+1}: {tokens}")
+            else:
+                print(f"line {i+1}: {tokens}", end="\n\n")
+
+    def getInstructions(self):
+        """metod to slice the lex result into instructions (each instruction ends with <term> token"""
         instructions = []
         instruction = []
-        for token in list:
+        for token in self.lex.getIdent():
             if token == identifiers[0]:
                 instruction.append(token)
                 instructions.append(instruction)
                 instruction = []
             else:
                 instruction.append(token)
-
-        return instructions
-
-    def getInstructions(self):
-        self.instructions = self.createInstructions(self.lex.getIdent())
+        self.instructions = instructions
+        print("Init instructions: ")
+        self.printLines(self.instructions)
         return self
 
-    def termChange(self):
+    def createTermino(self):
+        """
+        method to change from ( <var> | <num> ----> <Término> ) 
+
+        This will not change ( <var> <eqTo> | <var> <TERM> )
+        """
         for instruction in self.instructions:
             instrucExpression = []
             for i, token in enumerate(instruction):
@@ -75,27 +86,35 @@ class Synx:
                 else:
                     instrucExpression.append(token)
             self.expressions.append(instrucExpression)
+
+        print("Instructions with <Término>: ")
+        self.printLines(self.expressions)
         return self
 
-    def isCompTerm(self, token: str):
+    def isCompToken(self, token: str):
+        """method to check if token is a <compOp>"""
         return True if token == identifiers[4] or token == identifiers[5] or token == identifiers[7] or token == identifiers[8] or token == identifiers[9] or token == identifiers[10] else False
 
-    def compTermChange(self):
+    def createCompOp(self):
+        """method to change from ( <eqTo> | <GreatT> | <LessT> | <EqualT> | <GreEqT> | <LesEqT> | <DiffT> ----> <compOp> )"""
         auxExpressions = self.expressions.copy()
         self.expressions = []
         auxExpression = []
         for expression in auxExpressions:
             for token in expression:
-                if self.isCompTerm(token):
+                if self.isCompToken(token):
                     auxExpression.append(expressionIdentifies[10])
                 else:
                     auxExpression.append(token)
             self.expressions.append(auxExpression)
             auxExpression = []
 
+        print("Instructions with <compOp>: ")
+        self.printLines(self.expressions)
         return self
 
-    def compChange(self):
+    def createComparacion(self):
+        """method to change from ( <Término> <copmOp> <Término> ----> <Comparación> )"""
         auxExpressions = self.expressions.copy()
         self.expressions = []
         auxExpression = []
@@ -116,9 +135,13 @@ class Synx:
                         counter = 0
             self.expressions.append(auxExpression)
             auxExpression = []
+
+        print("Instructions with <Comparación>: ")
+        self.printLines(self.expressions)
         return self
 
-    def igualChange(self):
+    def createIgualdad(self):
+        """method to change from ( <var> <eqTo> <Término> | <var> <eqTo> <Comparación> -> <Igualdad> )"""
         auxExpressions = self.expressions.copy()
         self.expressions = []
         auxExpression = []
@@ -139,9 +162,13 @@ class Synx:
                         counter = 0
             self.expressions.append(auxExpression)
             auxExpression = []
+
+        print("Instructions with <Igualdad>: ")
+        self.printLines(self.expressions)
         return self
 
     def instrucChange(self):
+        """method to change from ( <Igualdad> <term> | <Comparación> <term> -> <Instrucción> )"""
         auxExpressions = self.expressions.copy()
         self.expressions = []
         auxExpression = []
@@ -162,19 +189,38 @@ class Synx:
                         counter = 0
             self.expressions.append(auxExpression)
             auxExpression = []
+
+        print("Instructions with <Instrucción>: ")
+        self.printLines(self.expressions)
         return self
 
-    def prograChange(self):
+    def createPrograma(self):
+        """method check programa"""
         for i, expresion in enumerate(self.expressions):
             if expresion[0] != expressionIdentifies[1]:
-                aux = self.createInstructions(self.lex.getIdent())
-                raise TypeError("Error in line " +
+                aux = self.instructions
+                raise SynxError("Error in line " +
                                 str(aux.index(aux[i]) + 1) + ": " + str(aux[i]))
         self.result = expressionIdentifies[0]
+        print(
+            f"Code has been checked and is valid!: {self.result}", end="\n\n")
 
 
-try:
-    Syntax = Synx(Lex(input("Please input string to check: ")))
+exit = False
+while(not exit):
+    try:
+        print("Synx:\n[1] => Analyze string\n[2] => Exit", end="\n\n")
+        option = int(input("Please input what to do: "))
+        if option == 1:
+            Syntax = Synx(Lex(input("Please input string to check: ")))
+        elif option == 2:
+            exit = True
+        else:
+            print("SELECT A VALID OPTION!", end="\n\n")
 
-except TypeError as err:
-    print(err)
+    except SynxError as err:
+        print(err, end="\n\n")
+    except LexError as err:
+        print(err, end="\n\n")
+    except ValueError:
+        print("SELECT A VALID OPTION!", end="\n\n")
