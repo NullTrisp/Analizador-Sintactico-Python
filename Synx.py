@@ -1,4 +1,3 @@
-from LEX.LexError import LexError
 from SynxError import SynxError
 from LEX.Lex import Lex
 from LEX.Lex import identifiers
@@ -17,8 +16,6 @@ from LEX.Lex import identifiers
 
 (4) <var> <eqTo> <Término> | <var> <eqTo> <Comparación> -> <Igualdad>
 (5) <Igualdad> <term> | <Comparación> <term> -> <Instrucción>
-
-jsf3=43;df5=17;dsfa=jsf3>=df5;var;;
 
 """
 
@@ -39,6 +36,7 @@ expressionIdentifies = ["<Programa>",
 
 class Synx:
     def __init__(self, lex: Lex):
+        print("Synx:")
         self.lex = lex
         self.expressions = []
         self.getInstructions().createTermino().createCompOp(
@@ -204,23 +202,3 @@ class Synx:
         self.result = expressionIdentifies[0]
         print(
             f"Code has been checked and is valid!: {self.result}", end="\n\n")
-
-
-exit = False
-while(not exit):
-    try:
-        print("Synx:\n[1] => Analyze string\n[2] => Exit", end="\n\n")
-        option = int(input("Please input what to do: "))
-        if option == 1:
-            Syntax = Synx(Lex(input("Please input string to check: ")))
-        elif option == 2:
-            exit = True
-        else:
-            print("SELECT A VALID OPTION!", end="\n\n")
-
-    except SynxError as err:
-        print(err, end="\n\n")
-    except LexError as err:
-        print(err, end="\n\n")
-    except ValueError:
-        print("SELECT A VALID OPTION!", end="\n\n")
