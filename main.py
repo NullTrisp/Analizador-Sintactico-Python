@@ -17,10 +17,7 @@ while(not exit):
             exit = True
         else:
             print("SELECT A VALID OPTION!", end="\n\n")
-
-    except SynxError as err:
-        print(err, end="\n\n")
-    except LexError as err:
+    except SynxError or LexError as err:
         print(err, end="\n\n")
     except ValueError:
         print("SELECT A VALID OPTION!", end="\n\n")
